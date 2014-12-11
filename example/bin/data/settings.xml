@@ -1,0 +1,12 @@
+<group>
+	<Show_Mask>0</Show_Mask>
+	<Background_Threshold>21</Background_Threshold>
+	<LearnvTime>50</LearnvTime>
+	<Ready_for_Cells>1</Ready_for_Cells>
+	<Link_Cells>0</Link_Cells>
+	<Gain>1.5</Gain>
+	<Smoothing>5</Smoothing>
+	<Framerate>19.6827</Framerate>
+<group/>
+	<Current_Frame>1102</Current_Frame>
+</group>
