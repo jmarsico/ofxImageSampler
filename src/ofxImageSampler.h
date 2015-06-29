@@ -3,6 +3,8 @@
 //  traffic_lights_rtsp
 //
 //  Created by Jakob Marsico on 3/18/14.
+
+// found on github!
 //
 
 #ifndef __traffic_lights_rtsp__sampleCell__
@@ -36,6 +38,8 @@ public:
     ofPoint mouseClick;
     vector <ofPoint> pixIn;
     ofPolyline shape;
+    
+    
     int ID;
     
     ofPixels pix;
