@@ -18,6 +18,7 @@ public:
     ofxImageSampler();
     
     void init(int _ID);
+    void setFillColor(ofColor col);
     void setPointsLinked(ofPoint oldP0, ofPoint oldP1, const ofPixels &_pix, ofPoint _startPoint);
     void setPoints(const ofPixels &_pix, ofPoint _startPoint);
     
@@ -33,9 +34,12 @@ public:
     void addPoint();
     void getPixLocations();
     
+    struct cellPoint {
+        ofPoint point;
+        bool bMoving;
+    };
     
-    vector <ofPoint> p;
-    ofPoint mouseClick;
+    vector <cellPoint> p;
     vector <ofPoint> pixIn;
     ofPolyline shape;
     
@@ -53,10 +57,19 @@ public:
     void mouseReleased(ofMouseEventArgs & args);
     bool bIsSet;
     
+    ofPoint mouseClick;
+    
     
 protected:
     
     void setCellColor(const ofPixels &_pix);
+    ofColor fillColor;
+    
+    void movePoint();
+
+    ofPoint mouseLoc;
+    ofPoint mouseReleasePoint;
+    
     
     bool bRegisteredEvents;
     

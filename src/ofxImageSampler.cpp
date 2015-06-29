@@ -24,6 +24,11 @@ void ofxImageSampler::init(int _ID){
     {
         average.push_back(0);
     }
+    fillColor.set(200);
+}
+
+void ofxImageSampler::setFillColor(ofColor col){
+    fillColor = col;
 }
 
 
@@ -40,16 +45,25 @@ void ofxImageSampler::setPointsLinked(ofPoint oldP0, ofPoint oldP1, const ofPixe
         ofRegisterMouseEvents(this); // this will enable our circle class to listen to the mouse events.
         bRegisteredEvents = true;
     }
-   
-    p.push_back(oldP0);
-    p.push_back(oldP1);
-    shape.addVertex(p[0]);
-    shape.addVertex(p[1]);
+    
+    cellPoint temp0;
+    temp0.point = oldP0;
+    temp0.bMoving = false;
+
+    cellPoint temp1;
+    temp1.point = oldP1;
+    temp1.bMoving = false;
+    
+    
+    p.push_back(temp0);
+    p.push_back(temp1);
+    shape.addVertex(p[0].point);
+    shape.addVertex(p[1].point);
     
     ofLog() << "*************************************************";
     ofLogVerbose() << "setPoints " << ID << " started with two points";
-    ofLogVerbose() << "cell[" << ID << "] p[0] is: " << p[0].x << " " << p[0].y;
-    ofLogVerbose() << "cell[" << ID << "] p[1] is: " << p[1].x << " " << p[1].y;
+    ofLogVerbose() << "cell[" << ID << "] p[0] is: " << p[0].point.x << " " << p[0].point.y;
+    ofLogVerbose() << "cell[" << ID << "] p[1] is: " << p[1].point.x << " " << p[1].point.y;
 
 }
 
@@ -75,41 +89,45 @@ void ofxImageSampler::addPoint(){
     {
         if(p.size() == 0)
         {
-            ofPoint temp;
-            temp.x = mouseClick.x;
-            temp.y = mouseClick.y;
+            cellPoint temp;
+            temp.point.x = mouseClick.x;
+            temp.point.y = mouseClick.y;
+            temp.bMoving = false;
             p.push_back(temp);
-            shape.addVertex(p[0]);
+            shape.addVertex(p[0].point);
         }
         else if(p.size() == 1)
         {
-            ofPoint temp;
-            temp.x = mouseClick.x;
-            temp.y = mouseClick.y;
+            cellPoint temp;
+            temp.point.x = mouseClick.x;
+            temp.point.y = mouseClick.y;
+            temp.bMoving = false;
             p.push_back(temp);
-            shape.addVertex(p[1]);
+            shape.addVertex(p[1].point);
         }
         else if(p.size() == 2)
         {
-            ofPoint temp;
-            temp.x = mouseClick.x;
-            temp.y = mouseClick.y;
+            cellPoint temp;
+            temp.point.x = mouseClick.x;
+            temp.point.y = mouseClick.y;
+            temp.bMoving = false;
             p.push_back(temp);
-            shape.addVertex(p[2]);
+            shape.addVertex(p[2].point);
         }
         else if(p.size() == 3)
         {
-            ofPoint temp;
-            temp.x = mouseClick.x;
-            temp.y = mouseClick.y;
+            cellPoint temp;
+            temp.point.x = mouseClick.x;
+            temp.point.y = mouseClick.y;
+            temp.bMoving = false;
             p.push_back(temp);
-            shape.addVertex(p[3]);
+            shape.addVertex(p[3].point);
             shape.close();
             bSettingPoints = false;
             bIsSet = true;
     
             ofLogVerbose("ofxImageSampler") << "sample cell " << ID << " is set.";
-            ofUnregisterMouseEvents(this);
+            //ofUnregisterMouseEvents(this);
         }
         
         if(bIsSet)
@@ -121,6 +139,8 @@ void ofxImageSampler::addPoint(){
 
 //--------------------------------------------------------------
 void ofxImageSampler::getPixLocations(){
+    
+    pixIn.clear();
     
     for(int x = 0; x < pix.getWidth(); x++)
     {
@@ -155,6 +175,7 @@ void ofxImageSampler::update(const ofPixels &_pix){
         //total = 0;
     }
     setCellColor(pix);
+    
     
 }
 
@@ -249,22 +270,31 @@ int ofxImageSampler::getAverageBrightness(int _numSamples){
 
 //--------------------------------------------------------------
 void ofxImageSampler::draw(){
-    alpha = 50 ;
     ofFill();
     if(bIsSet){
-        ofSetColor(167,160,160, alpha);
+        ofSetColor(fillColor);
         ofBeginShape();
-        ofVertex(p[0]);
-        ofVertex(p[1]);
-        ofVertex(p[2]);
-        ofVertex(p[3]);
+        ofVertex(p[0].point);
+        ofVertex(p[1].point);
+        ofVertex(p[2].point);
+        ofVertex(p[3].point);
         ofEndShape();
+    }
+    
+    for(int i = 0; i < p.size(); i++)
+    {
+        ofSetColor(255, 50, 100, 100);
+        ofCircle(p[i].point, 5);
+        
     }
     
     ofNoFill();
     ofSetColor(0, 255, 0);
     shape.draw();
+    ofSetColor(167,160,160, 200);
+    ofCircle(shape.getCentroid2D().x, shape.getCentroid2D().y, 10);
     ofDrawBitmapString(ofToString(brightness), shape.getCentroid2D().x, shape.getCentroid2D().y);
+    
     
 }
 
@@ -279,13 +309,62 @@ void ofxImageSampler::reset(){
     pixIn.clear();
 }
 
+
+void ofxImageSampler::movePoint(){
+    
+    
+    for(int i = 0; i < p.size(); i++)
+    {
+        if(mouseClick.x < p[i].point.x + 5 &&
+           mouseClick.x > p[i].point.x - 5 &&
+           mouseClick.y < p[i].point.y + 5 &&
+           mouseClick.y > p[i].point.y - 5)
+        {
+            p[i].bMoving = true;
+            ofLog() << "POINT GRAB!";
+        }
+        
+    }
+    
+
+}
+
 //--------------------------------------------------------------
-void ofxImageSampler::mouseMoved(ofMouseEventArgs & args){}
-void ofxImageSampler::mouseDragged(ofMouseEventArgs & args){}
+void ofxImageSampler::mouseMoved(ofMouseEventArgs & args){
+    mouseLoc.x = args.x;
+    mouseLoc.y = args.y;
+
+}
+void ofxImageSampler::mouseDragged(ofMouseEventArgs & args){
+    for(int i = 0; i < p.size(); i++)
+    {
+        if(p[i].bMoving)
+        {
+            p[i].point.set(args.x, args.y);
+            shape.getVertices()[i].set(args.x, args.y);
+            
+        }
+    }
+
+
+}
 void ofxImageSampler::mousePressed(ofMouseEventArgs & args){
     mouseClick.x = args.x;
     mouseClick.y = args.y;
     addPoint();
+    movePoint();
+
+    
+
 }
-void ofxImageSampler::mouseReleased(ofMouseEventArgs & args){}
+void ofxImageSampler::mouseReleased(ofMouseEventArgs & args){
+    //if the mouse is released, stop all points from moving
+    
+    for(int i = 0; i < p.size(); i++)
+    {
+        if(p[i].bMoving) getPixLocations();
+        p[i].bMoving = false;
+        
+    }
+}
 
