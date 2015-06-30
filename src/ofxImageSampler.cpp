@@ -272,6 +272,7 @@ int ofxImageSampler::getAverageBrightness(int _numSamples){
 void ofxImageSampler::draw(){
     ofFill();
     if(bIsSet){
+        fillColor.a = 150;
         ofSetColor(fillColor);
         ofBeginShape();
         ofVertex(p[0].point);
