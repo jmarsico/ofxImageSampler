@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include "ofMain.h"
+#include "ofxColorGradient.h"
 
 class ofxImageSampler{
 public:
@@ -43,6 +44,8 @@ public:
     vector <ofPoint> pixIn;
     ofPolyline shape;
     
+    ofPoint centroid;
+    
     
     int ID;
     
@@ -58,6 +61,7 @@ public:
     bool bIsSet;
     
     ofPoint mouseClick;
+    bool bClick;
     
     
 protected:
@@ -83,6 +87,8 @@ protected:
     int avgCounter;
     int runningTotal;
     int numSamples;
+    
+    ofxColorGradient gradient;
     
     
 };

@@ -25,6 +25,18 @@ void ofxImageSampler::init(int _ID){
         average.push_back(0);
     }
     fillColor.set(200);
+    bClick = false;
+    
+    ofColor c0;
+    c0.set(255, 40, 50);
+    ofColor c1;
+    c1.set(0, 178, 209);
+    ofColor c2;
+    c2.set(10,10,50);
+    
+//    gradient.addColor(c0);
+    gradient.addColor(c1);
+    gradient.addColor(c2);
 }
 
 void ofxImageSampler::setFillColor(ofColor col){
@@ -87,48 +99,41 @@ void ofxImageSampler::addPoint(){
     
     if(bSettingPoints == true)
     {
+        
         if(p.size() == 0)
         {
             cellPoint temp;
-            temp.point.x = mouseClick.x;
-            temp.point.y = mouseClick.y;
+            temp.point = mouseClick;
             temp.bMoving = false;
             p.push_back(temp);
-            shape.addVertex(p[0].point);
+            shape.addVertex(temp.point);
+        } else {
+        
+            if(mouseClick.x < p[0].point.x + 5 &&
+               mouseClick.x > p[0].point.x - 5 &&
+               mouseClick.y < p[0].point.y + 5 &&
+               mouseClick.y > p[0].point.y - 5)
+            {
+                cellPoint temp;
+                temp.point = mouseClick;
+                temp.bMoving = false;
+                p.push_back(temp);
+                shape.addVertex(temp.point);
+                shape.close();
+                bSettingPoints = false;
+                bIsSet = true;
+                
+                ofLogVerbose("ofxImageSampler") << "sample cell " << ID << " is set.";
+            } else {
+                cellPoint temp;
+                temp.point = mouseClick;
+                temp.bMoving = false;
+                p.push_back(temp);
+                shape.addVertex(temp.point);
+            }
         }
-        else if(p.size() == 1)
-        {
-            cellPoint temp;
-            temp.point.x = mouseClick.x;
-            temp.point.y = mouseClick.y;
-            temp.bMoving = false;
-            p.push_back(temp);
-            shape.addVertex(p[1].point);
-        }
-        else if(p.size() == 2)
-        {
-            cellPoint temp;
-            temp.point.x = mouseClick.x;
-            temp.point.y = mouseClick.y;
-            temp.bMoving = false;
-            p.push_back(temp);
-            shape.addVertex(p[2].point);
-        }
-        else if(p.size() == 3)
-        {
-            cellPoint temp;
-            temp.point.x = mouseClick.x;
-            temp.point.y = mouseClick.y;
-            temp.bMoving = false;
-            p.push_back(temp);
-            shape.addVertex(p[3].point);
-            shape.close();
-            bSettingPoints = false;
-            bIsSet = true;
-    
-            ofLogVerbose("ofxImageSampler") << "sample cell " << ID << " is set.";
-            //ofUnregisterMouseEvents(this);
-        }
+        
+
         
         if(bIsSet)
         {
@@ -149,7 +154,7 @@ void ofxImageSampler::getPixLocations(){
             if(shape.inside(x + startX, y + startY))
             {
                 ofPoint index;
-                index.set(x+startX, y+startY);
+                index.set(x, y);
                 pixIn.push_back(index);
             }
         }
@@ -175,6 +180,8 @@ void ofxImageSampler::update(const ofPixels &_pix){
         //total = 0;
     }
     setCellColor(pix);
+    
+    centroid = shape.getCentroid2D();
     
     
 }
@@ -272,29 +279,40 @@ int ofxImageSampler::getAverageBrightness(int _numSamples){
 void ofxImageSampler::draw(){
     ofFill();
     if(bIsSet){
-        fillColor.a = 150;
+//        fillColor.set( gradient.getColorAtPercent(ofMap(brightness, 0.0, 255.0, 0.0, 1.0)));
+        fillColor.set( gradient.getColorAtPercent(0.));
+
+        fillColor.a = ofMap(brightness, 0.0, 255.0, 0.0, 200.0);
         ofSetColor(fillColor);
         ofBeginShape();
-        ofVertex(p[0].point);
-        ofVertex(p[1].point);
-        ofVertex(p[2].point);
-        ofVertex(p[3].point);
+        for(int i = 0; i < p.size(); i++)
+        {
+            ofVertex(p[i].point);
+        }
+        
         ofEndShape();
     }
     
     for(int i = 0; i < p.size(); i++)
     {
         ofSetColor(255, 50, 100, 100);
-        ofCircle(p[i].point, 5);
+        ofCircle(p[i].point, 2);
         
     }
+    if(p.size() > 0)
+    {
+        ofSetColor(50, 50, 255, 100);
+        ofCircle(p[0].point, 2);
+    }
+    
     
     ofNoFill();
-    ofSetColor(0, 255, 0);
+    ofSetColor(200, 200, 255);
     shape.draw();
-    ofSetColor(167,160,160, 200);
-    ofCircle(shape.getCentroid2D().x, shape.getCentroid2D().y, 10);
-    ofDrawBitmapString(ofToString(brightness), shape.getCentroid2D().x, shape.getCentroid2D().y);
+    ofSetColor(0, 255, 0);
+//    ofCircle(shape.getCentroid2D().x, shape.getCentroid2D().y, 10);
+//    ofDrawBitmapString(ofToString(brightness), shape.getCentroid2D().x, shape.getCentroid2D().y);
+    
     
     
 }
